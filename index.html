@@ -759,15 +759,33 @@ function setNote(n) {
   });
 }
 
-function saveCard() {
+async function saveCard() {
   if (currentIdx === null) return;
-  stories[currentIdx].commentaire = document.getElementById('comment').value.trim();
+
+  const cbLue = document.getElementById('cb-lue');
+  const comment = document.getElementById('comment');
+
+  if (cbLue) stories[currentIdx].lue = cbLue.checked;
+  if (comment) stories[currentIdx].commentaire = comment.value.trim();
+
   stories[currentIdx].dateLecture = new Date().toISOString();
+
   save();
-  syncGoogleSheet();
+
+  // Rafraîchir immédiatement les éléments visibles de l'app
+  const bilanVisible = document.getElementById('tab-bilan')?.style.display === 'block';
+  if (bilanVisible) renderBilan();
+
+  const searchInput = document.getElementById('search-input');
+  if (searchInput && searchInput.value.trim().length >= 2) searchStories();
+
+  await syncGoogleSheet();
+
   const c = document.getElementById('save-confirm');
-  c.classList.add('show');
-  setTimeout(() => c.classList.remove('show'), 2000);
+  if (c) {
+    c.classList.add('show');
+    setTimeout(() => c.classList.remove('show'), 2000);
+  }
 }
 
 function showTab(name) {
